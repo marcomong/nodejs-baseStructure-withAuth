@@ -1,7 +1,18 @@
 const winston = require('winston');
 const config = require('../config');
+const path = require('path')
+const logDir = path.join(__dirname, '../../logs')
 
 const transports = [];
+transports.push(
+  new winston.transports.File({
+    filename: path.join(logDir, path.join(getFormattedDate())),
+    level: 'debug',
+    prettyPrint: true,
+    format: winston.format.printf(info => `${new Date().toISOString()}, ${info.message}`),
+    json: false
+  }
+  ))
 if (process.env.NODE_ENV == 'production') {
   transports.push(
     new winston.transports.Console()
@@ -15,6 +26,20 @@ if (process.env.NODE_ENV == 'production') {
       )
     })
   )
+}
+
+function getFormattedDate() {
+  var date = new Date()
+
+  var year = date.getFullYear()
+
+  var month = (1 + date.getMonth()).toString()
+  month = month.length > 1 ? month : '0' + month
+
+  var day = date.getDate().toString()
+  day = day.length > 1 ? day : '0' + day
+
+  return month + '-' + day + '-' + year + '.log'
 }
 
 const LoggerInstance = winston.createLogger({
